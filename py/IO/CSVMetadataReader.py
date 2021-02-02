@@ -1,4 +1,5 @@
 import logging as log
+import numpy as np
 
 # ------------------------------------------------------------------------------
 
@@ -67,7 +68,7 @@ class CSVMetadataReader:
     elif ID in CSVMetadataReader.float_data:
       data = float(data)
     elif ID in CSVMetadataReader.array_data:
-      data = eval(data)
+      data = np.array(eval(data))
       
     return data
     
