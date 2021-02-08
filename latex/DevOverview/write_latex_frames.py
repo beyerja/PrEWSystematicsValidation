@@ -1,21 +1,23 @@
-# TODO TODO TODO
-# Add Readme
-# Add comments
-# TODO TODO TODO
-
 def main():
+  """ Create a file with latex code that produce frames with all the plots 
+      from the deviation tests.
+  """
+
+  # Deviation directions that were testest
   dev_dir_list = [
     "center_only",
     "lower_edge_only",
     "upper_edge_only",
     "width_only" ]
   
+  # Difermion sub-categories that were tested
   difermion_list = [
     "2f_mu_180to275_250_eLpR_costh_f_star",
     "2f_mu_180to275_250_eRpL_costh_f_star",
     "2f_mu_81to101_250_eLpR_costh_f_star",
     "2f_mu_81to101_250_eRpL_costh_f_star" ]
   
+  # WW sub-categories that were tested
   ww_list = [
     "WW_muminus_250_eLpR_costh_Wminus_star",
     "WW_muminus_250_eLpR_costh_l_star",
@@ -30,6 +32,7 @@ def main():
     "WW_muplus_250_eRpL_costh_l_star",
     "WW_muplus_250_eRpL_phi_l_star" ]
     
+  # Open a latex file and write the frames
   latex_file = open("Frames.tex", "w+")
   
   for difermion_base in difermion_list:
@@ -49,6 +52,8 @@ def main():
       latex_file.write("\\end{frame}\n\n")
   
   latex_file.close()
+  
+#-------------------------------------------------------------------------------
   
 if __name__ == "__main__":
   main()
