@@ -1,1 +1,13 @@
 *__pycache__*
+
+*.aux
+*.fdb_latexmk
+*.fls
+*.nav
+*.out
+*.pdf
+*.snm
+*.log
+*.toc
+
+/latex/DevOverview/Frames.tex

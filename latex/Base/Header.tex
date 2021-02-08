@@ -1,0 +1,332 @@
+\documentclass[xcolor=dvipsnames,compress,DESYcyan,9pt,unknownkeysallowed]{beamer}
+
+\usepackage{blindtext}
+% \usepackage[utf8,latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{amsmath, amscd} %amscd for commutative diagrams
+\usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage{array}
+\usepackage{blkarray}
+\usepackage{color}
+\usepackage{enumerate}
+\usepackage{fancybox}
+\usepackage{float}
+\usepackage[hang]{footmisc}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{lmodern}
+\usepackage{multirow}
+\usepackage{pifont}
+\usepackage{rotating}
+\usepackage[small, sl, SL,sf, SF, bf, hang, raggedright]{subfigure}
+\usepackage{tabularx}
+\usepackage{tcolorbox}
+\usepackage{textpos}
+\usepackage{textcomp}
+\usepackage{tikz}
+\usepackage{upgreek}
+\usepackage{appendixnumberbeamer}
+\usepackage{courier} % For programming style font
+
+\definecolor{DESYcyan}{RGB}{0,166,235}
+\definecolor{DESYorange}{RGB}{242,142,0}
+\definecolor{DESYgray}{RGB}{119,119,119}
+\definecolor{CBSpurple}{RGB}{117,112,179}
+\definecolor{CBSorange}{RGB}{217,95,2}
+\definecolor{CBSgreen}{RGB}{27,158,119}
+\newcommand\OrangeBFMath[1]{{\color{DESYorange}\boldsymbol{#1}}}
+\newcommand\CyanBFMath[1]{{\color{DESYcyan}\boldsymbol{#1}}}
+
+\usepackage[font=footnotesize,labelfont={color=DESYorange,footnotesize}]{caption}
+
+\usepackage{xcolor}
+\definecolor{light-gray}{gray}{0.8}
+\usepackage{relsize}
+\renewcommand*{\UrlFont}{\ttfamily\smaller\relax}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=black,
+	filecolor=black,
+	urlcolor=black,%light-gray,
+	breaklinks=true
+}
+
+
+
+\usepackage[compat=1.1.0]{tikz-feynman}
+\usepackage{contour}
+
+\usetikzlibrary{arrows,shapes,positioning}
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{decorations.pathmorphing}
+\usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary{patterns}
+\usetikzlibrary{plotmarks}
+\usetikzlibrary{shadows}
+
+\tcbuselibrary{skins}
+
+\newcommand*\at{{\fontfamily{ptm}\selectfont @}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Code:
+
+\usepackage{ulem} %for underline, crossing our, etc...
+
+\lstset{
+%backgroundcolor=\color{lbcolor},
+    tabsize=2,
+%   rulecolor=,
+    language=[GNU]C++,
+    % linewidth=0.9\textwidth,
+    xleftmargin=.1\textwidth,
+        basicstyle=\scriptsize,
+        upquote=true,
+        aboveskip={1.5\baselineskip},
+        columns=fixed,
+        showstringspaces=false,
+        extendedchars=false,
+        breaklines=true,
+        prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+        frame=single,
+        % numbers=left,
+        showtabs=false,
+        showspaces=false,
+        showstringspaces=false,
+        identifierstyle=\ttfamily,
+        keywordstyle=\color[rgb]{0,0,1},
+        commentstyle=\color[rgb]{0.026,0.112,0.095},
+        stringstyle=\color[rgb]{0.627,0.126,0.941},
+        numberstyle=\color[rgb]{0.205, 0.142, 0.73},
+%        \lstdefinestyle{C++}{language=C++,style=numbers}’.
+    texcl=true,
+}
+
+% \usepackage{filecontent}
+
+\newsavebox\mybox
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\setlength\footnotemargin{10pt}
+
+\let\beginoldtabular=\tabular
+\let\endoldtabular\endtabular
+\renewenvironment{tabular}
+{
+	\def\arraystretch{1.5}
+	\beginoldtabular
+}
+{
+	\endoldtabular
+}
+
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+\let\beginoldtabularx=\tabularx
+\let\endoldtabularx\endtabularx
+\renewenvironment{tabularx}
+{
+	\def\arraystretch{1.5}
+	\beginoldtabularx
+}
+{
+	\endoldtabularx
+}
+
+
+\usepackage{beamerthemesplit}
+
+
+
+% \usetheme{CambridgeUS}
+\usefonttheme[onlymath]{serif}
+\usecolortheme[named=DESYcyan]{structure}
+\useoutertheme{infolines}
+% \useoutertheme{default}
+
+
+\setbeamercolor{palette primary}{bg=white}
+\setbeamercolor{section in head/foot}{bg=DESYcyan, fg=white}
+\setbeamercolor{frametitle}{fg=DESYcyan,bg=white}
+\setbeamerfont{frametitle}{series=\bfseries, size=\LARGE}
+\setbeamercolor{framesubtitle}{fg=DESYorange,bg=white}
+\setbeamerfont{framesubtitle}{series=\bfseries}
+\addtobeamertemplate{headline}{\hypersetup{linkcolor=white}\vspace*{0.7em}}{\vspace*{-0.2em}}
+% \setbeamertemplate{headline}{\leavevmode \hypersetup{linkcolor=white} }
+
+\setbeamercolor{item}{fg=DESYorange}
+\setbeamercolor{subitem}{fg=DESYcyan}
+\setbeamercolor{subsubitem}{fg=DESYgray}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}{}
+\setbeamertemplate{bibliography item}[text]
+
+
+\addtobeamertemplate{footline}{}{
+\begin{textblock*}{0.9\textwidth}[-0.1,1](-0.5cm, -0.3cm)  %(5cm,5cm)
+\textbf{\textcolor{DESYcyan}{DESY}\textcolor{DESYorange}{.}} ~$\quad$ \hfill Page \insertframenumber/\inserttotalframenumber
+\end{textblock*}
+\begin{textblock*}{0.9\textwidth}[-0.1,1](5cm,5cm)
+\end{textblock*}
+}
+
+\tcbset{colframe=DESYcyan, colback=DESYcyan!2!white, colupper=black, fonttitle=\bfseries,nobeforeafter,center title}
+
+
+\setbeamercolor{title}{fg=DESYcyan}
+\setbeamerfont{title}{series=\bfseries, size=}
+\setbeamercolor{subtitle}{fg=DESYorange}
+
+\newcommand{\myitem}{\item[\ding{228}]}
+
+\newcommand{\BackUp}{\appendix\frame{\begin{center}\begin{Huge}Backup Slides\end{Huge}\end{center}}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Shadowed Images
+
+\usetikzlibrary{shadows,calc}
+
+% code adapted from https://tex.stackexchange.com/a/11483/3954
+
+% some parameters for customization
+\def\shadowshift{3pt,-3pt}
+\def\shadowradius{6pt}
+
+\colorlet{innercolor}{black!60}
+\colorlet{outercolor}{gray!05}
+
+% this draws a shadow under a rectangle node
+\newcommand\drawshadow[1]{
+    \begin{pgfonlayer}{shadow}
+        \shade[outercolor,inner color=innercolor,outer color=outercolor] ($(#1.south west)+(\shadowshift)+(\shadowradius/2,\shadowradius/2)$) circle (\shadowradius);
+        \shade[outercolor,inner color=innercolor,outer color=outercolor] ($(#1.north west)+(\shadowshift)+(\shadowradius/2,-\shadowradius/2)$) circle (\shadowradius);
+        \shade[outercolor,inner color=innercolor,outer color=outercolor] ($(#1.south east)+(\shadowshift)+(-\shadowradius/2,\shadowradius/2)$) circle (\shadowradius);
+        \shade[outercolor,inner color=innercolor,outer color=outercolor] ($(#1.north east)+(\shadowshift)+(-\shadowradius/2,-\shadowradius/2)$) circle (\shadowradius);
+        \shade[top color=innercolor,bottom color=outercolor] ($(#1.south west)+(\shadowshift)+(\shadowradius/2,-\shadowradius/2)$) rectangle ($(#1.south east)+(\shadowshift)+(-\shadowradius/2,\shadowradius/2)$);
+        \shade[left color=innercolor,right color=outercolor] ($(#1.south east)+(\shadowshift)+(-\shadowradius/2,\shadowradius/2)$) rectangle ($(#1.north east)+(\shadowshift)+(\shadowradius/2,-\shadowradius/2)$);
+        \shade[bottom color=innercolor,top color=outercolor] ($(#1.north west)+(\shadowshift)+(\shadowradius/2,-\shadowradius/2)$) rectangle ($(#1.north east)+(\shadowshift)+(-\shadowradius/2,\shadowradius/2)$);
+        \shade[outercolor,right color=innercolor,left color=outercolor] ($(#1.south west)+(\shadowshift)+(-\shadowradius/2,\shadowradius/2)$) rectangle ($(#1.north west)+(\shadowshift)+(\shadowradius/2,-\shadowradius/2)$);
+        \filldraw ($(#1.south west)+(\shadowshift)+(\shadowradius/2,\shadowradius/2)$) rectangle ($(#1.north east)+(\shadowshift)-(\shadowradius/2,\shadowradius/2)$);
+    \end{pgfonlayer}
+}
+
+% create a shadow layer, so that we don't need to worry about overdrawing other things
+\pgfdeclarelayer{shadow}
+\pgfsetlayers{shadow,main}
+
+
+\newcommand\shadowimage[2][]{%
+\begin{tikzpicture}
+\node[anchor=south west,inner sep=0] (image) at (0,0) {\includegraphics[#1]{#2}};
+\drawshadow{image}
+\end{tikzpicture}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% New symbols
+
+
+\newcommand{\Lagr}{\mathcal{L}} % Lagrangian-L
+\newcommand{\Lumi}{\mathcal{L}} % Lagrangian-L
+\newcommand{\oper}{\mathcal{O}} % Operator symbol
+\newcommand{\Pol}{\mathcal{P}} % Operator symbol
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DESY text colors
+
+\newcommand\OrangeBF[1]{\textcolor{DESYorange}{\textbf{#1}}}
+\newcommand\CyanBF[1]{\textcolor{DESYcyan}{\textbf{#1}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Convenient way to set border around input
+
+\newcommand\scaledinput[2][]{
+  \scalebox{#1}{\input{#2}}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Rotated text
+
+\usepackage{rotating}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Particles
+\newcommand{\eP}{e^{+}}
+\newcommand{\eM}{e^{-}}
+\newcommand{\muP}{\mu^{+}}
+\newcommand{\muM}{\mu^{-}}
+\newcommand{\lP}{l^{+}}
+\newcommand{\lM}{l^{-}}
+
+\newcommand{\fbar}{\bar{f}}
+\newcommand{\mubar}{\bar{\mu}}
+
+\newcommand{\eL}{\eM_{L}}
+\newcommand{\eR}{\eM_{R}}
+\newcommand{\pL}{\eP_{L}}
+\newcommand{\pR}{\eP_{R}}
+
+\newcommand{\nue}{\nu_e}
+\newcommand{\numu}{\nu_{\mu}}
+\newcommand{\nutau}{\nu_{\tau}}
+\newcommand{\nul}{\nu_l}
+
+\newcommand{\nubar}{\bar{\nu}}
+\newcommand{\nuebar}{\bar{\nue}}
+\newcommand{\nulbar}{\bar{\nul}}
+
+\newcommand{\lbar}{\bar{l}}
+
+\newcommand{\qbar}{\bar{q}}
+\newcommand{\qu}{q_{u}}
+\newcommand{\qd}{q_{d}}
+\newcommand{\qubar}{\bar{q}_{u}}
+\newcommand{\qdbar}{\bar{q}_{d}}
+\newcommand{\cbar}{\bar{c}}
+\newcommand{\bbar}{\bar{b}}
+
+\newcommand{\tbar}{\bar{t}}
+
+\newcommand{\vis}{\text{vis}}
+\newcommand{\inv}{\text{inv}}
+
+\newcommand{\WP}{W^{+}}
+\newcommand{\WM}{W^{-}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Checkmark
+
+\def\checkmark{\tikz\fill[scale=0.4](0,.35) -- (.25,0) -- (1,.7) -- (.25,.15) -- cycle;}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Allow Latex over included graphic
+\usepackage[percent]{overpic}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Package for additional symbols like cross-x
+\usepackage{pifont}
+\newcommand{\xmark}{\ding{55}}%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Allow line-breaks in tabular cell
+\usepackage{makecell}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Allow frame around includegraphics
+\usepackage[export]{adjustbox}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Transparent memes
+\usepackage{transparent}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Define new table column commands that allow a \newline line break
+\usepackage{array}
+% \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+% \newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+% \newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
