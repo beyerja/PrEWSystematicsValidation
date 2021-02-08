@@ -6,9 +6,9 @@ def main():
   # Deviation directions that were testest
   dev_dir_list = [
     "center_only",
+    "width_only",
     "lower_edge_only",
-    "upper_edge_only",
-    "width_only" ]
+    "upper_edge_only" ]
   
   # Difermion sub-categories that were tested
   difermion_list = [
@@ -36,19 +36,33 @@ def main():
   latex_file = open("Frames.tex", "w+")
   
   for difermion_base in difermion_list:
+    latex_file.write("\\begin{frame}\n")
+    latex_file.write("\\begin{center}\n")
+    latex_file.write("\\includegraphics[width=\\alonefraction\\textwidth]{{\\DifermionPath/CutEffect/{}_CutEffect.pdf}}\n".format(difermion_base))
+    latex_file.write("\\end{center}\n")
+    latex_file.write("\\end{frame}\n\n")
+    
     for dev_dir in dev_dir_list:
       latex_file.write("\\begin{frame}\n")
-      latex_file.write("\\includegraphics[width=\\thirdfraction\\textwidth]{{\\DifermionPath/CutEffect/{}_CutEffect.pdf}}\n".format(difermion_base))
-      latex_file.write("\\includegraphics[width=\\thirdfraction\\textwidth]{{\\DifermionPath/DevCutCut0/{}_DevCutCut0_{}.pdf}}\n".format(difermion_base,dev_dir))
-      latex_file.write("\\includegraphics[width=\\thirdfraction\\textwidth]{{\\DifermionPath/DevParCut/{}_DevParCut_{}.pdf}}\n".format(difermion_base,dev_dir))
+      latex_file.write("\\begin{center}\n")
+      latex_file.write("\\includegraphics[width=\\halffraction\\textwidth]{{\\DifermionPath/DevCutCut0/{}_DevCutCut0_{}.pdf}}\n".format(difermion_base,dev_dir))
+      latex_file.write("\\includegraphics[width=\\halffraction\\textwidth]{{\\DifermionPath/DevParCut/{}_DevParCut_{}.pdf}}\n".format(difermion_base,dev_dir))
+      latex_file.write("\\end{center}\n")
       latex_file.write("\\end{frame}\n\n")
   
   for ww_base in ww_list:
+    latex_file.write("\\begin{frame}\n")
+    latex_file.write("\\begin{center}\n")
+    latex_file.write("\\includegraphics[width=\\alonefraction\\textwidth]{{\\WWPath/CutEffect/{}_CutEffect.pdf}}\n".format(ww_base))
+    latex_file.write("\\end{center}\n")
+    latex_file.write("\\end{frame}\n\n")
+    
     for dev_dir in dev_dir_list:
       latex_file.write("\\begin{frame}\n")
-      latex_file.write("\\includegraphics[width=\\thirdfraction\\textwidth]{{\\WWPath/CutEffect/{}_CutEffect.pdf}}\n".format(ww_base))
-      latex_file.write("\\includegraphics[width=\\thirdfraction\\textwidth]{{\\WWPath/DevCutCut0/{}_DevCutCut0_{}.pdf}}\n".format(ww_base,dev_dir))
-      latex_file.write("\\includegraphics[width=\\thirdfraction\\textwidth]{{\\WWPath/DevParCut/{}_DevParCut_{}.pdf}}\n".format(ww_base,dev_dir))
+      latex_file.write("\\begin{center}\n")
+      latex_file.write("\\includegraphics[width=\\halffraction\\textwidth]{{\\WWPath/DevCutCut0/{}_DevCutCut0_{}.pdf}}\n".format(ww_base,dev_dir))
+      latex_file.write("\\includegraphics[width=\\halffraction\\textwidth]{{\\WWPath/DevParCut/{}_DevParCut_{}.pdf}}\n".format(ww_base,dev_dir))
+      latex_file.write("\\end{center}\n")
       latex_file.write("\\end{frame}\n\n")
   
   latex_file.close()
