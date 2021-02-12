@@ -45,8 +45,9 @@ def main():
     for dev_dir in dev_dir_list:
       latex_file.write("\\begin{frame}\n")
       latex_file.write("\\begin{center}\n")
-      latex_file.write("\\includegraphics[width=\\halffraction\\textwidth]{{\\DifermionPath/DevCutCut0/{}_DevCutCut0_{}.pdf}}\n".format(difermion_base,dev_dir))
-      latex_file.write("\\includegraphics[width=\\halffraction\\textwidth]{{\\DifermionPath/DevParCut/{}_DevParCut_{}.pdf}}\n".format(difermion_base,dev_dir))
+      latex_file.write("\\includegraphics[width=\\thirdfraction\\textwidth]{{\\DifermionPath/DevCutCut0/{}_DevCutCut0_{}.pdf}}\n".format(difermion_base,dev_dir))
+      latex_file.write("\\includegraphics[width=\\thirdfraction\\textwidth]{{\\DifermionPath/DevParCut0/{}_DevParCut0_{}.pdf}}\n".format(difermion_base,dev_dir))
+      latex_file.write("\\includegraphics[width=\\thirdfraction\\textwidth]{{\\DifermionPath/DevParCut/{}_DevParCut_{}.pdf}}\n".format(difermion_base,dev_dir))
       latex_file.write("\\end{center}\n")
       latex_file.write("\\end{frame}\n\n")
   
@@ -60,8 +61,9 @@ def main():
     for dev_dir in dev_dir_list:
       latex_file.write("\\begin{frame}\n")
       latex_file.write("\\begin{center}\n")
-      latex_file.write("\\includegraphics[width=\\halffraction\\textwidth]{{\\WWPath/DevCutCut0/{}_DevCutCut0_{}.pdf}}\n".format(ww_base,dev_dir))
-      latex_file.write("\\includegraphics[width=\\halffraction\\textwidth]{{\\WWPath/DevParCut/{}_DevParCut_{}.pdf}}\n".format(ww_base,dev_dir))
+      latex_file.write("\\includegraphics[width=\\thirdfraction\\textwidth]{{\\WWPath/DevCutCut0/{}_DevCutCut0_{}.pdf}}\n".format(ww_base,dev_dir))
+      latex_file.write("\\includegraphics[width=\\thirdfraction\\textwidth]{{\\WWPath/DevParCut0/{}_DevParCut0_{}.pdf}}\n".format(ww_base,dev_dir))
+      latex_file.write("\\includegraphics[width=\\thirdfraction\\textwidth]{{\\WWPath/DevParCut/{}_DevParCut_{}.pdf}}\n".format(ww_base,dev_dir))
       latex_file.write("\\end{center}\n")
       latex_file.write("\\end{frame}\n\n")
   
