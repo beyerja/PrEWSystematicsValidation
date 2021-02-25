@@ -152,8 +152,27 @@ def plot_chi_squared_test(file_path, output_formats=["pdf"]):
   x_max = max([max(c) for c in chi_sq_c0])
   y_min = min([min(c) for c in chi_sq_pc])
   y_max = max([max(c) for c in chi_sq_pc])
-  x_bin_edges = np.linspace(x_min, x_max, 21)
-  y_bin_edges = np.linspace(y_min, y_max, 21)
+  
+  # Log edges 
+  edge_min = 0.5 * y_min
+  edge_max = 1.5 * max(x_max,y_max)
+  log_edge_min = np.log10(edge_min)
+  log_edge_max = np.log10(edge_max)
+  edges = np.logspace(log_edge_min, log_edge_max, 16)
+  
+  # Set logarithmic axes 
+  ax_scatter.set_yscale('log')
+  ax_scatter.set_xscale('log')
+  ax_histx.set_xscale('log')
+  ax_histy.set_yscale('log')
+  ax_scatter.set_ylim(edge_min,edge_max)
+  ax_scatter.set_xlim(edge_min,edge_max)
+  ax_histx.set_xlim(edge_min,edge_max)
+  ax_histy.set_ylim(edge_min,edge_max)
+
+  # Draw diagonal axis line, everything below that line is fine
+  ax_scatter.fill_between(edges,edges,edge_max*np.ones(16),color='red',alpha=0.5)
+  ax_scatter.axline((edge_min, edge_min), (edge_max, edge_max), ls='--', color='black')
 
   colors = PHC.ColorMap("nipy_spectral",len(dev_directions)+1)
 
@@ -163,14 +182,9 @@ def plot_chi_squared_test(file_path, output_formats=["pdf"]):
     color = colors[i_dir]
     scatter = ax_scatter.scatter(x, y, color='none', edgecolors=color, marker=PHM.markers[i_dir], label=dev_directions[i_dir].name)
 
-    ax_histx.hist(x, bins=x_bin_edges, histtype='step',fill=False, ec=color)
-    ax_histy.hist(y, bins=y_bin_edges, orientation='horizontal', histtype='step',fill=False, ec=color)
+    ax_histx.hist(x, bins=edges, histtype='step',fill=False, ec=color)
+    ax_histy.hist(y, bins=edges, orientation='horizontal', histtype='step',fill=False, ec=color)
 
-  ax_scatter.set_xlim(0,ax_scatter.get_xlim()[1])
-  ax_scatter.set_ylim(0,ax_scatter.get_ylim()[1])
-  ax_histx.set_xlim(ax_scatter.get_xlim())
-  ax_histy.set_ylim(ax_scatter.get_ylim())
-  
   legend_title = r"$\cos\theta_{{\mu}}^{{cut}}={}$,".format(reader["Coef|MuonAcc_CutValue"]) + "\n" + r"$\sqrt{{\Delta c^2 + \Delta w^2}} \leq {}\delta$".format(d_max/reader["Delta"])
   ax_scatter.legend(loc=leg_pos, title=legend_title)
   
