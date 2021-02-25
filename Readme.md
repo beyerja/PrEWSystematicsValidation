@@ -22,6 +22,7 @@ The code to create the validation plots is in the `py/ValidationTests` directory
 cd py/ValidationTests
 python CutEffect.py # Find the absolute effect of the base cut on the distribution
 python DeviationTest.py # Effects of changes in the cut
+python ChiSquaredTest.py # Test significance of mistake made by parametrisation
 ```
 
 #### Creating overview pdfs
