@@ -14,8 +14,10 @@ def main():
   difermion_list = [
     "2f_mu_180to275_250_eLpR_costh_f_star",
     "2f_mu_180to275_250_eRpL_costh_f_star",
-    "2f_mu_81to101_250_eLpR_costh_f_star",
-    "2f_mu_81to101_250_eRpL_costh_f_star" ]
+    "2f_mu_81to101_FZ_250_eLpR_costh_f_star",
+    "2f_mu_81to101_FZ_250_eRpL_costh_f_star",
+    "2f_mu_81to101_BZ_250_eLpR_costh_f_star",
+    "2f_mu_81to101_BZ_250_eRpL_costh_f_star" ]
   
   # WW sub-categories that were tested
   ww_list = [
