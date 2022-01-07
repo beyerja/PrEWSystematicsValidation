@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import sys
+from tqdm import tqdm
 
 # Local modules
 import Naming as VTN
@@ -13,6 +14,7 @@ import Reader as IOR
 import SysHelpers as IOSH
 sys.path.append("../PlottingHelp")
 import Colors as PHC
+import DefaultFormat as PHDF
 import Markers as PHM
 sys.path.append("../ValidityMeasures")
 import CommonConfig as VMCC
@@ -30,11 +32,15 @@ class DevDirection:
 # Library of most relevant deviation directions 
 # -> use lambda functions of delta = [delta-c, delta-w] to describe direction
 dev_directions = (
-  DevDirection("all points", lambda deltas: True),
-  DevDirection("center only", lambda deltas: deltas[1] == 0),
-  DevDirection("width only", lambda deltas: deltas[0] == 0),
-  DevDirection("upper edge only", lambda deltas: deltas[0] - deltas[1]/2.0 == 0),
-  DevDirection("lower edge only", lambda deltas: deltas[0] + deltas[1]/2.0 == 0)
+  DevDirection("center", lambda deltas: deltas[1] == 0),
+  DevDirection("width", lambda deltas: deltas[0] == 0),
+  DevDirection("upper edge", lambda deltas: deltas[0] - deltas[1]/2.0 == 0),
+  DevDirection("lower edge", lambda deltas: deltas[0] + deltas[1]/2.0 == 0),
+  DevDirection("combinations", 
+    lambda deltas: not ((deltas[1] == 0) or 
+                        (deltas[0] == 0) or 
+                        (deltas[0] - deltas[1]/2.0 == 0) or 
+                        (deltas[0] + deltas[1]/2.0 == 0)))
 )
 
 #-------------------------------------------------------------------------------
@@ -109,6 +115,7 @@ def plot_chi_squared_test(file_path, output_formats=["pdf"]):
             log.warning("Bin {} at deviation ({}) has 0 for cut and non-0 for parametrisation".format(b,dir_deltas[d]))
         elif np.all(N_cut[b] == N_cut_cut0[b]):
           # Skip bins that aren't affected by the cut
+          # Their contribution to each chi^2 is zero anyway
           continue
         else:
           dev_chi_sq_pc += diff_pc_sq_d[b] / N_cut_d[b]
@@ -124,69 +131,42 @@ def plot_chi_squared_test(file_path, output_formats=["pdf"]):
   # --- Plotting ---------------------------------------------------------------
 
   # start with a rectangular Figure
-  fig = plt.figure(figsize=(6, 6))
-  title = "{} : {}{} @ {}fb$^{{-1}}$".format(reader["Name"],VTN.eM_chirality(reader["e-Chirality"]),VTN.eP_chirality(reader["e+Chirality"]),VMCC.TestLumi)
-  fig.suptitle(title)#, fontsize=16)
+  fig = plt.figure(figsize=(7.5, 6), tight_layout=True)
   
-  # definitions for the axes
-  left, width = 0.18, 0.49
-  bottom, height = 0.1, 0.49
-  spacing = 0.005
-  rect_scatter = [left, bottom, width, height]
-  rect_histx = [left, bottom + height + spacing, width, 0.93 - (bottom + height + spacing)]
-  rect_histy = [left + width + spacing, bottom, 0.93 - (left + width + spacing), height]
-  leg_pos = [(width + spacing)/width, (height + spacing)/height]
+  ax_scatter = plt.gca()
+  title = "{}, ${}$ab$^{{-1}}$".format(VTN.metadata_to_process(reader),VMCC.TestLumi/1000)
+  ax_scatter.set_title(title)
+  ax_scatter.set_xlabel(r"$\chi_{shift}^{2} = \sum_{bins} \left(\frac{N_{cut}^{(\Delta c, \Delta w)} - N_{cut}^{0}}{\sqrt{N_{cut}^{0}}}\right)^2$")
+  ax_scatter.set_ylabel(r"$\chi_{par}^{2} = \sum_{bins} \left(\frac{N_{par}^{(\Delta c, \Delta w)} - N_{cut}^{(\Delta c, \Delta w)}}{\sqrt{N_{cut}^{(\Delta c, \Delta w)}}}\right)^2$")
   
-  ax_scatter = plt.axes(rect_scatter)
-  ax_scatter.tick_params(direction='in', top=True, right=True)
-  ax_scatter.set_xlabel(r"$\chi_{shift}^{2} = \sum_{affected\, bins} (\frac{N_{cut}^{(\Delta c, \Delta w)} - N_{cut}^{0}}{\sqrt{N_{cut}^{0}}})^2$")
-  ax_scatter.set_ylabel(r"$\chi_{par}^{2} = \sum_{affected\, bins} (\frac{N_{par}^{(\Delta c, \Delta w)} - N_{cut}^{(\Delta c, \Delta w)}}{\sqrt{N_{cut}^{(\Delta c, \Delta w)}}})^2$")
-  ax_histx = plt.axes(rect_histx)
-  ax_histx.tick_params(direction='in', labelbottom=False)
-  ax_histx.set_ylabel("# $(\Delta c, \Delta w)$ points")
-  ax_histy = plt.axes(rect_histy)
-  ax_histy.tick_params(direction='in', labelleft=False)
-  ax_histy.set_xlabel("# $(\Delta c, \Delta w)$ points")
-
+  # Set logarithmic axes 
   x_min = min([min(c) for c in chi_sq_c0])
   x_max = max([max(c) for c in chi_sq_c0])
   y_min = min([min(c) for c in chi_sq_pc])
   y_max = max([max(c) for c in chi_sq_pc])
-  
-  # Log edges 
   edge_min = 0.5 * y_min
   edge_max = 1.5 * max(x_max,y_max)
   log_edge_min = np.log10(edge_min)
   log_edge_max = np.log10(edge_max)
   edges = np.logspace(log_edge_min, log_edge_max, 16)
-  
-  # Set logarithmic axes 
   ax_scatter.set_yscale('log')
   ax_scatter.set_xscale('log')
-  ax_histx.set_xscale('log')
-  ax_histy.set_yscale('log')
   ax_scatter.set_ylim(edge_min,edge_max)
   ax_scatter.set_xlim(edge_min,edge_max)
-  ax_histx.set_xlim(edge_min,edge_max)
-  ax_histy.set_ylim(edge_min,edge_max)
 
   # Draw diagonal axis line, everything below that line is fine
   ax_scatter.fill_between(edges,edges,edge_max*np.ones(16),color='red',alpha=0.5)
   ax_scatter.axline((edge_min, edge_min), (edge_max, edge_max), ls='--', color='black')
 
-  colors = PHC.ColorMap("nipy_spectral",len(dev_directions)+1)
+  colors =  plt.rcParams['axes.prop_cycle'].by_key()['color']
 
   for i_dir in range(len(dev_directions)):
-    x = chi_sq_c0[i_dir]
-    y = chi_sq_pc[i_dir]
-    color = colors[i_dir]
-    scatter = ax_scatter.scatter(x, y, color='none', edgecolors=color, marker=PHM.markers[i_dir], label=dev_directions[i_dir].name)
-
-    ax_histx.hist(x, bins=edges, histtype='step',fill=False, ec=color)
-    ax_histy.hist(y, bins=edges, orientation='horizontal', histtype='step',fill=False, ec=color)
+    scatter = ax_scatter.scatter(chi_sq_c0[i_dir], chi_sq_pc[i_dir], 
+                color='none', ec=colors[i_dir], lw=2, s=10**2, 
+                marker=PHM.markers[i_dir], label=dev_directions[i_dir].name)
 
   legend_title = r"$\cos\theta_{{\mu}}^{{cut}}={}$,".format(reader["Coef|MuonAcc_CutValue"]) + "\n" + r"$\sqrt{{\Delta c^2 + \Delta w^2}} \leq {}\delta$".format(d_max/reader["Delta"])
-  ax_scatter.legend(loc=leg_pos, title=legend_title)
+  ax_scatter.legend(title=legend_title, loc="upper left")
   
   # Save the figure in all requested formats
   for format in output_formats:
@@ -203,14 +183,18 @@ def main():
   """ Run the cut effect plotting for each relevant file.
   """
   log.basicConfig(level=log.WARNING) # Set logging level
+  PHDF.set_default_mpl_format()
 
   input_dirs = [
-    "/home/jakob/Documents/DESY/MountPoints/DUSTMount/TGCAnalysis/SampleProduction/NewMCProduction/2f_Z_l/PrEWInput/validation",
-    "/home/jakob/Documents/DESY/MountPoints/DUSTMount/TGCAnalysis/SampleProduction/NewMCProduction/4f_WW_sl/PrEWInput/validation"
+    "/home/jakob/DESY/MountPoints/DUST/TGCAnalysis/SampleProduction/NewMCProduction/2f_Z_l/PrEWInput/MuAcc_costheta_0.9925/validation",
+    "/home/jakob/DESY/MountPoints/DUST/TGCAnalysis/SampleProduction/NewMCProduction/4f_WW_sl/PrEWInput/validation"
   ]
   
-  for input_dir in input_dirs:
-    for file_path in IOSH.find_files(input_dir, ".csv"):
+  # Set a useful font size
+  plt.rcParams.update({'font.size': 17})
+  
+  for input_dir in tqdm(input_dirs, desc="Input dirs"):
+    for file_path in tqdm(IOSH.find_files(input_dir, ".csv"), desc="Files", leave=False):
       log.debug("Found file: {}".format(file_path))
       plot_chi_squared_test(file_path)
       

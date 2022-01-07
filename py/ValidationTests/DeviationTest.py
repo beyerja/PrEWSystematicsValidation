@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import sys
+from tqdm import tqdm
 
 # Local modules
 import Naming as VTN
@@ -13,6 +14,7 @@ import Reader as IOR
 import SysHelpers as IOSH
 sys.path.append("../PlottingHelp")
 import Colors as PHC
+import DefaultFormat as PHDF
 import Markers as PHM
 sys.path.append("../ValidityMeasures")
 import CommonConfig as VMCC
@@ -23,18 +25,38 @@ import DeltaHelp as VMDH
 class DevDirection:
   """ Class defines one deviation direction.
   """
-  def __init__(self,name,func):
+  def __init__(self,name,coord,func):
     self.name = name
-    self.func = np.vectorize(func,signature='(n)->()')
-
+    self.coord = coord
+    self.func = func
+    
 # Library of most relevant deviation directions 
 # -> use lambda functions of delta = [delta-c, delta-w] to describe direction
 dev_directions = {
-  DevDirection("center only", lambda deltas: deltas[1] == 0),
-  DevDirection("width only", lambda deltas: deltas[0] == 0),
-  DevDirection("upper edge only", lambda deltas: deltas[0] - deltas[1]/2.0 == 0),
-  DevDirection("lower edge only", lambda deltas: deltas[0] + deltas[1]/2.0 == 0)
+  DevDirection("center", "c", lambda deltas: deltas[:,1] == 0),
+  DevDirection("width", "w", lambda deltas: deltas[:,0] == 0),
+  DevDirection("upper edge", "x_{{up}}", lambda deltas: deltas[:,0] - deltas[:,1]/2.0 == 0),
+  DevDirection("lower edge", "x_{{low}}", lambda deltas: deltas[:,0] + deltas[:,1]/2.0 == 0)
 }
+
+def delta_in_dir(dir_name, deltas):
+  """ Calculate the deviation in the given direction.
+  """
+  if dir_name == "center":
+    return deltas[:,0]
+  elif dir_name == "width":
+    return deltas[:,1]
+  elif dir_name == "upper edge":
+    return deltas[:,0] + deltas[:,1]/2.0
+  elif dir_name == "lower edge":
+    return deltas[:,0] - deltas[:,1]/2.0
+  else:
+    raise Exception("Unknown dir name ", dir_name)
+
+def ratio(a,b,default=0.0):
+  """ Calculate ratio between two arrays, if denominator point is 0 set default.
+  """
+  return np.where(np.abs(b)>0.00000001,a/b,default)
 
 #-------------------------------------------------------------------------------
 
@@ -68,47 +90,57 @@ def plot_deviation_test(file_path, output_formats=["pdf"]):
   # Find the deltas and the minimum and maximum deviations
   deltas = IOPH.delta_pairs(df)
   delta_metrics = VMDH.delta_metric(deltas)
-  colors = PHC.ColorSpectrum("plasma",np.amin(delta_metrics),1.1*np.amax(delta_metrics))
+  colors = PHC.ColorSpectrum("turbo",-1.1*np.amax(delta_metrics),1.1*np.amax(delta_metrics))
   
-  for dev_dir in dev_directions:
+  for dev_dir in tqdm(dev_directions, desc="Dev. dir. loop", leave=False):
     log.debug("Looking at direction {}".format(dev_dir.name))
     dir_selection = dev_dir.func(deltas)
     dir_rows = df[dir_selection]
     dir_deltas = deltas[dir_selection]
+    deltas_in_dir = delta_in_dir(dev_dir.name, dir_deltas)
     
     N_cut = np.array([dir_rows["C{}".format(b)] for b in range(n_bins)])
     N_par = np.array([dir_rows["P{}".format(b)] for b in range(n_bins)])
     
-    diff_c0 = (N_cut - N_cut_cut0)*scale_factor
-    diff_p0 = (N_par - N_cut_cut0)*scale_factor
-    diff_pc = (N_par - N_cut)*scale_factor
+    diff_c0 = np.sqrt(scale_factor) * ratio(N_cut - N_cut_cut0, np.sqrt(N_cut_cut0)) 
+    diff_p0 = np.sqrt(scale_factor) * ratio(N_par - N_cut_cut0, np.sqrt(N_cut_cut0)) 
+    diff_pc = np.sqrt(scale_factor) * ratio(N_par - N_cut, np.sqrt(N_cut)) 
     
-    for d in range(n_dims):
+    title = "{}, ${}$ab$^{{-1}}$".format(VTN.metadata_to_process(reader),VMCC.TestLumi/1000)
+    legend_title = "Shift {}\n$\Delta {}$ $[\delta={}]$".format(dev_dir.name,dev_dir.coord, reader["Delta"])
+    
+    for d in tqdm(range(n_dims), desc="Dim. loop", leave=False):
       x = bin_centers[:,d]
-      title = "{} : {}{} @ {}fb$^{{-1}}$ - Shift: {}".format(reader["Name"],VTN.eM_chirality(reader["e-Chirality"]),VTN.eP_chirality(reader["e+Chirality"]),VMCC.TestLumi,dev_dir.name)
-      
-      #--- Plot N_cut - N_cut0 -------------------------------------------------
-      
-      # start with a rectangular Figure
-      fig = plt.figure(figsize=(6, 6))
-      fig.suptitle(title)#, fontsize=16)
+      x_min, x_max = bin_edges[d][0], bin_edges[d][-1]
+      coord_name = "${}$".format(VTN.name_to_coord(reader["CoordName"][d]))
       
       # definitions for the axes
-      left, width = 0.15, 0.49
-      bottom, height = 0.1, 0.49
+      figsize = (12,10)
+      left, width = 0.17, 0.49
+      bottom, height = 0.12, 0.49
       spacing = 0.005
       rect_scatter = [left, bottom, width, height]
       rect_histx = [left, bottom + height + spacing, width, 0.93 - (bottom + height + spacing)]
       rect_histy = [left + width + spacing, bottom, 0.93 - (left + width + spacing), height]
       leg_pos = [(width + spacing)/width, (height + spacing)/height]
       
+      # Common plotting arguments
+      common_sc_kwargs = { "color":'none', "linewidths": 2 , "s": 10**2}
+      common_hist_kwargs = { "histtype":'step', "fill": False, "lw" : 2 }
+      
+      #--- Plot N_cut - N_cut0 -------------------------------------------------
+      
+      # start with a rectangular Figure
+      fig = plt.figure(figsize=figsize)
+      fig.suptitle(title)#, fontsize=16)
+      
       ax_scatter = plt.axes(rect_scatter)
       ax_scatter.tick_params(direction='in', top=True, right=True)
-      ax_scatter.set_xlabel(reader["CoordName"][d])
-      ax_scatter.set_ylabel(r"$N_{cut}^{(\Delta c,\Delta w)} - N_{cut}^{0}$")
+      ax_scatter.set_xlabel(coord_name)
+      ax_scatter.set_ylabel(r"$\left(N_{cut}^{(\Delta c,\Delta w)} - N_{cut}^{0}\right)/\sqrt{N_{cut}^{0}}$")
       ax_histx = plt.axes(rect_histx)
       ax_histx.tick_params(direction='in', labelbottom=False)
-      ax_histx.set_ylabel("Cumulative")
+      ax_histx.set_ylabel("$\sum_{bins} y^2$")
       ax_histy = plt.axes(rect_histy)
       ax_histy.tick_params(direction='in', labelleft=False)
       ax_histy.set_xlabel("#bins")
@@ -117,16 +149,17 @@ def plot_deviation_test(file_path, output_formats=["pdf"]):
 
       for row in range(len(dir_deltas)):
         y = diff_c0[:,row]
-        color = colors[VMDH.delta_metric(dir_deltas[row])[0]]
-        scatter = ax_scatter.scatter(x, y, color='none', edgecolors=color, marker=PHM.markers[row], label=r"$({} \delta, {} \delta)$".format(dir_deltas[row][0]/reader["Delta"],dir_deltas[row][1]/reader["Delta"]))
+        color = colors[deltas_in_dir[row]]
+        scatter = ax_scatter.scatter(x, y, edgecolors=color, marker=PHM.markers[row], label=r"${}$".format(deltas_in_dir[row]/reader["Delta"]), **common_sc_kwargs)
 
-        ax_histx.hist(x, bins=bin_edges[d], weights=y, histtype='step',fill=False, ec=color)
-        ax_histy.hist(y, bins=y_bin_edges, orientation='horizontal', histtype='step',fill=False, ec=color)
+        ax_histx.hist(x, bins=bin_edges[d], weights=y**2, ec=color, **common_hist_kwargs)
+        ax_histy.hist(y, bins=y_bin_edges, orientation='horizontal', ec=color, **common_hist_kwargs)
 
+      ax_scatter.set_xlim((x_min, x_max))
       ax_histx.set_xlim(ax_scatter.get_xlim())
       ax_histy.set_ylim(ax_scatter.get_ylim())
       
-      ax_scatter.legend(loc=leg_pos, title=r"$(\Delta c, \Delta w), \delta={}$".format(reader["Delta"]))
+      ax_scatter.legend(loc=leg_pos, title=legend_title, ncol=2)
       
       # Save the figure in all requested formats
       for format in output_formats:
@@ -140,25 +173,16 @@ def plot_deviation_test(file_path, output_formats=["pdf"]):
       #--- Plot N_par - N_cut0 -------------------------------------------------
       
       # start with a rectangular Figure
-      fig = plt.figure(figsize=(6, 6))
+      fig = plt.figure(figsize=figsize)
       fig.suptitle(title)#, fontsize=16)
-      
-      # definitions for the axes
-      left, width = 0.15, 0.49
-      bottom, height = 0.1, 0.49
-      spacing = 0.005
-      rect_scatter = [left, bottom, width, height]
-      rect_histx = [left, bottom + height + spacing, width, 0.93 - (bottom + height + spacing)]
-      rect_histy = [left + width + spacing, bottom, 0.93 - (left + width + spacing), height]
-      leg_pos = [(width + spacing)/width, (height + spacing)/height]
       
       ax_scatter = plt.axes(rect_scatter)
       ax_scatter.tick_params(direction='in', top=True, right=True)
-      ax_scatter.set_xlabel(reader["CoordName"][d])
-      ax_scatter.set_ylabel(r"$N_{par}^{(\Delta c,\Delta w)} - N_{cut}^{0}$")
+      ax_scatter.set_xlabel(coord_name)
+      ax_scatter.set_ylabel(r"$\left(N_{par}^{(\Delta c,\Delta w)} - N_{cut}^{0}\right)/\sqrt{N_{cut}^{0}}$")
       ax_histx = plt.axes(rect_histx)
       ax_histx.tick_params(direction='in', labelbottom=False)
-      ax_histx.set_ylabel("Cumulative")
+      ax_histx.set_ylabel("$\sum_{bins} y^2$")
       ax_histy = plt.axes(rect_histy)
       ax_histy.tick_params(direction='in', labelleft=False)
       ax_histy.set_xlabel("#bins")
@@ -167,16 +191,17 @@ def plot_deviation_test(file_path, output_formats=["pdf"]):
 
       for row in range(len(dir_deltas)):
         y = diff_p0[:,row]
-        color = colors[VMDH.delta_metric(dir_deltas[row])[0]]
-        scatter = ax_scatter.scatter(x, y, color='none', edgecolors=color, marker=PHM.markers[row], label=r"$({} \delta, {} \delta)$".format(dir_deltas[row][0]/reader["Delta"],dir_deltas[row][1]/reader["Delta"]))
+        color = colors[deltas_in_dir[row]]
+        scatter = ax_scatter.scatter(x, y, edgecolors=color, marker=PHM.markers[row], label=r"${}$".format(deltas_in_dir[row]/reader["Delta"]), **common_sc_kwargs)
 
-        ax_histx.hist(x, bins=bin_edges[d], weights=y, histtype='step',fill=False, ec=color)
-        ax_histy.hist(y, bins=y_bin_edges, orientation='horizontal', histtype='step',fill=False, ec=color)
+        ax_histx.hist(x, bins=bin_edges[d], weights=y**2, ec=color, **common_hist_kwargs)
+        ax_histy.hist(y, bins=y_bin_edges, orientation='horizontal', ec=color, **common_hist_kwargs)
 
+      ax_scatter.set_xlim((x_min, x_max))
       ax_histx.set_xlim(ax_scatter.get_xlim())
       ax_histy.set_ylim(ax_scatter.get_ylim())
       
-      ax_scatter.legend(loc=leg_pos, title=r"$(\Delta c, \Delta w), \delta={}$".format(reader["Delta"]))
+      ax_scatter.legend(loc=leg_pos, title=legend_title, ncol=2)
       
       # Save the figure in all requested formats
       for format in output_formats:
@@ -190,25 +215,16 @@ def plot_deviation_test(file_path, output_formats=["pdf"]):
       #--- Plot N_par - N_cut --------------------------------------------------
       
       # start with a rectangular Figure
-      fig = plt.figure(figsize=(6, 6))
+      fig = plt.figure(figsize=figsize)
       fig.suptitle(title)#, fontsize=16)
-      
-      # definitions for the axes
-      left, width = 0.15, 0.49
-      bottom, height = 0.1, 0.49
-      spacing = 0.005
-      rect_scatter = [left, bottom, width, height]
-      rect_histx = [left, bottom + height + spacing, width, 0.93 - (bottom + height + spacing)]
-      rect_histy = [left + width + spacing, bottom, 0.93 - (left + width + spacing), height]
-      leg_pos = [(width + spacing)/width, (height + spacing)/height]
       
       ax_scatter = plt.axes(rect_scatter)
       ax_scatter.tick_params(direction='in', top=True, right=True)
-      ax_scatter.set_xlabel(reader["CoordName"][d])
-      ax_scatter.set_ylabel(r"$N_{par}^{(\Delta c,\Delta w)} - N_{cut}^{(\Delta c,\Delta w)}$")
+      ax_scatter.set_xlabel(coord_name)
+      ax_scatter.set_ylabel(r"$\left(N_{par}^{(\Delta c,\Delta w)} - N_{cut}^{(\Delta c,\Delta w)}\right)/\sqrt{N_{cut}^{(\Delta c,\Delta w)}}$")
       ax_histx = plt.axes(rect_histx)
       ax_histx.tick_params(direction='in', labelbottom=False)
-      ax_histx.set_ylabel("Cumulative")
+      ax_histx.set_ylabel("$\sum_{bins} y^2$")
       ax_histy = plt.axes(rect_histy)
       ax_histy.tick_params(direction='in', labelleft=False)
       ax_histy.set_xlabel("#bins")
@@ -217,16 +233,17 @@ def plot_deviation_test(file_path, output_formats=["pdf"]):
 
       for row in range(len(dir_deltas)):
         y = diff_pc[:,row]
-        color = colors[VMDH.delta_metric(dir_deltas[row])[0]]
-        scatter = ax_scatter.scatter(x, y, color='none', edgecolors=color, marker=PHM.markers[row], label=r"$({} \delta, {} \delta)$".format(dir_deltas[row][0]/reader["Delta"],dir_deltas[row][1]/reader["Delta"]))
+        color = colors[deltas_in_dir[row]]
+        scatter = ax_scatter.scatter(x, y, edgecolors=color, marker=PHM.markers[row], label=r"${}$".format(deltas_in_dir[row]/reader["Delta"]), **common_sc_kwargs)
 
-        ax_histx.hist(x, bins=bin_edges[d], weights=y, histtype='step',fill=False, ec=color)
-        ax_histy.hist(y, bins=y_bin_edges, orientation='horizontal', histtype='step',fill=False, ec=color)
+        ax_histx.hist(x, bins=bin_edges[d], weights=y**2, ec=color, **common_hist_kwargs)
+        ax_histy.hist(y, bins=y_bin_edges, orientation='horizontal', ec=color, **common_hist_kwargs)
 
+      ax_scatter.set_xlim((x_min, x_max))
       ax_histx.set_xlim(ax_scatter.get_xlim())
       ax_histy.set_ylim(ax_scatter.get_ylim())
       
-      ax_scatter.legend(loc=leg_pos, title=r"$(\Delta c, \Delta w), \delta={}$".format(reader["Delta"]))
+      ax_scatter.legend(loc=leg_pos, title=legend_title, ncol=2)
       
       # Save the figure in all requested formats
       for format in output_formats:
@@ -236,21 +253,22 @@ def plot_deviation_test(file_path, output_formats=["pdf"]):
         fig.savefig("{}/{}_{}_DevParCut_{}.{}".format(format_dir, base_name, reader["CoordName"][d], dev_dir_name, format))
       
       plt.close(fig)
-
+      
 #-------------------------------------------------------------------------------
 
 def main():
   """ Run the cut effect plotting for each relevant file.
   """
   log.basicConfig(level=log.WARNING) # Set logging level
+  PHDF.set_default_mpl_format()
 
   input_dirs = [
-    "/home/jakob/Documents/DESY/MountPoints/DUSTMount/TGCAnalysis/SampleProduction/NewMCProduction/2f_Z_l/PrEWInput/validation",
-    "/home/jakob/Documents/DESY/MountPoints/DUSTMount/TGCAnalysis/SampleProduction/NewMCProduction/4f_WW_sl/PrEWInput/validation"
+    "/home/jakob/DESY/MountPoints/DUST/TGCAnalysis/SampleProduction/NewMCProduction/2f_Z_l/PrEWInput/MuAcc_costheta_0.9925/validation",
+    "/home/jakob/DESY/MountPoints/DUST/TGCAnalysis/SampleProduction/NewMCProduction/4f_WW_sl/PrEWInput/validation"
   ]
   
-  for input_dir in input_dirs:
-    for file_path in IOSH.find_files(input_dir, ".csv"):
+  for input_dir in tqdm(input_dirs, desc="Input dir loop"):
+    for file_path in tqdm(IOSH.find_files(input_dir, ".csv"), desc="File loop", leave=False):
       log.debug("Found file: {}".format(file_path))
       plot_deviation_test(file_path)
       

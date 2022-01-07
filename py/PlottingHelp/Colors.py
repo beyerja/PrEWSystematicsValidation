@@ -37,6 +37,6 @@ class ColorSpectrum:
     """
     if (index < self.v_min) or (index > self.v_max):
       raise ValueError("Requested color for index {} out of range [{},{}].".format(index,self.v_min,self.v_max))
-    return self.colormap(float(index)/float(self.v_max - self.v_min))
+    return self.colormap(float(index- self.v_min)/float(self.v_max - self.v_min))
     
 #-------------------------------------------------------------------------------
