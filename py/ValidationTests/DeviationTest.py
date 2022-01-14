@@ -170,6 +170,29 @@ def plot_deviation_test(file_path, output_formats=["pdf"]):
       
       plt.close(fig)
       
+      #--- Only scatter plot N_cut - N_cut0 ------------------------------------
+      
+      fig = plt.figure(figsize=(9,7), tight_layout=True)
+      ax_scatter = plt.gca()
+      ax_scatter.set_title(title)
+      ax_scatter.set_xlabel(coord_name)
+      ax_scatter.set_ylabel(r"$\left(N_{cut}^{(\Delta c,\Delta w)} - N_{cut}^{0}\right)/\sqrt{N_{cut}^{0}}$")
+
+      for row in range(len(dir_deltas)):
+        scatter = ax_scatter.scatter(x, diff_c0[:,row], edgecolors=colors[deltas_in_dir[row]], marker=PHM.markers[row], label=r"${}$".format(deltas_in_dir[row]/reader["Delta"]), **common_sc_kwargs)
+
+      ax_scatter.set_xlim((x_min, x_max))
+      ax_scatter.legend(title=legend_title, ncol=3)
+      
+      # Save the figure in all requested formats
+      for format in output_formats:
+        format_dir = "{}/{}/DevCutCut0".format(output_dir,format)
+        IOSH.create_dir(format_dir)
+        dev_dir_name = dev_dir.name.replace(" ", "_")
+        fig.savefig("{}/{}_{}_DevCutCut0_ScatterOnly_{}.{}".format(format_dir, base_name, reader["CoordName"][d], dev_dir_name, format))
+      
+      plt.close(fig)
+      
       #--- Plot N_par - N_cut0 -------------------------------------------------
       
       # start with a rectangular Figure
