@@ -76,7 +76,7 @@ def name_to_coord(name):
   elif name == "costh_l_star":
     return "\\cos\\theta_l^*"
   elif name == "costh_Wminus_star":
-    return "\\cos\\theta_{{W^-}}^*"
+    return "\\cos\\theta_{{W^-}}"
   elif name == "phi_l_star":
     return "\\phi_l^*"
     return

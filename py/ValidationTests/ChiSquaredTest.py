@@ -136,8 +136,10 @@ def plot_chi_squared_test(file_path, output_formats=["pdf"]):
   ax_scatter = plt.gca()
   title = "{}, ${}$ab$^{{-1}}$".format(VTN.metadata_to_process(reader),VMCC.TestLumi/1000)
   ax_scatter.set_title(title)
-  ax_scatter.set_xlabel(r"$\chi_{shift}^{2} = \sum_{bins} \left(\frac{N_{cut}^{(\Delta c, \Delta w)} - N_{cut}^{0}}{\sqrt{N_{cut}^{0}}}\right)^2$")
-  ax_scatter.set_ylabel(r"$\chi_{par}^{2} = \sum_{bins} \left(\frac{N_{par}^{(\Delta c, \Delta w)} - N_{cut}^{(\Delta c, \Delta w)}}{\sqrt{N_{cut}^{(\Delta c, \Delta w)}}}\right)^2$")
+  ax_scatter.set_xlabel(r"$\chi_{shift}^{2}$", fontsize=26)
+  ax_scatter.set_ylabel(r"$\chi_{mismodel}^{2}$", fontsize=26)
+  # ax_scatter.set_xlabel(r"$\chi_{shift}^{2} = \sum_{bins} \left(\frac{N_{cut}^{(\Delta c, \Delta w)} - N_{cut}^{0}}{\sqrt{N_{cut}^{0}}}\right)^2$")
+  # ax_scatter.set_ylabel(r"$\chi_{par}^{2} = \sum_{bins} \left(\frac{N_{par}^{(\Delta c, \Delta w)} - N_{cut}^{(\Delta c, \Delta w)}}{\sqrt{N_{cut}^{(\Delta c, \Delta w)}}}\right)^2$")
   
   # Set logarithmic axes 
   x_min = min([min(c) for c in chi_sq_c0])
