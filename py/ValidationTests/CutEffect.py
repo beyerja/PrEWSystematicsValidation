@@ -1,4 +1,5 @@
 import logging as log
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -61,14 +62,16 @@ def plot_cut_effect(file_path, output_formats=["pdf"]):
     coord_name = "${}$".format(VTN.name_to_coord(reader["CoordName"][d]))
     
     # Create the figure
-    fig, ax = plt.subplots(figsize=(8,6), tight_layout=True)
+    fig, ax = plt.subplots(figsize=(8.5,6))#, tight_layout=True)
     # title = "{} : {}{}".format(reader["Name"],VTN.eM_chirality(reader["e-Chirality"]),VTN.eP_chirality(reader["e+Chirality"]))
     title = "{}, ${}$ab$^{{-1}}$".format(VTN.metadata_to_process(reader),VMCC.TestLumi/1000)
     ax.set_title(title)
     
     # Create the plots (no cut, actual cut, parametrised cut)
-    hist_nocut = plt.hist(x_vals, bins=x_edges, weights=y_nocut, label="Before cut")#, ec='black', fill=False)
-    hist_cut = plt.hist(x_vals, bins=x_edges, weights=y_cut, label="After cut")#, ec='#CC3311', fill=False, hatch="//")
+    colors =  plt.rcParams['axes.prop_cycle'].by_key()['color']
+    h_kwargs = { "bins": x_edges, "fill": False, "lw": 2}
+    hist_nocut = plt.hist(x_vals, weights=y_nocut, label="Before cut", ec=colors[0], hatch="//", **h_kwargs)#, ec='black', fill=False)
+    hist_cut = plt.hist(x_vals, weights=y_cut, label="After cut", ec=colors[1], hatch="\\\\", **h_kwargs)#, ec='#CC3311', fill=False, hatch="//")
     # hist_par = plt.hist(x_vals, bins=x_edges, weights=y_par, label="Param. cut", ec='#009988', fill=False, hatch="\\\\")
     
     # Some nicer plotting
@@ -77,6 +80,7 @@ def plot_cut_effect(file_path, output_formats=["pdf"]):
     ax.set_xlim((x_edges[0],x_edges[-1]))
     # ax.set_ylim([0,1.1*np.amax(hist_nocut[0])])
     ax.legend(title=r"$\cos\theta_{{\mu}}^{{cut}}={}$".format(reader["Coef|MuonAcc_CutValue"]))
+    fig.tight_layout(rect=[0, 0, 0.95, 1.0])
     
     # Save the figure in all requested formats
     for format in output_formats:
@@ -98,6 +102,9 @@ def main():
     "/home/jakob/DESY/MountPoints/DUST/TGCAnalysis/SampleProduction/NewMCProduction/2f_Z_l/PrEWInput/MuAcc_costheta_0.9925/validation",
     "/home/jakob/DESY/MountPoints/DUST/TGCAnalysis/SampleProduction/NewMCProduction/4f_WW_sl/PrEWInput/validation"
   ]
+  
+  # Change the hatch linewidth, only possible on global level
+  mpl.rcParams['hatch.linewidth'] = 1.5
   
   for input_dir in tqdm(input_dirs, desc="Input dir"):
     for file_path in tqdm(IOSH.find_files(input_dir, ".csv"), desc="Files", leave=False):
